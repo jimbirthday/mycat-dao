@@ -3,16 +3,16 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.mycat</groupId>
 	<artifactId>mycat-dao</artifactId>
-	<version>0.3-SNAPSHOT</version>
+	<version>0.3</version>
 	<name>Mycat Dao</name>
 	<description>Mycat's Dao</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<encoding>UTF-8</encoding>
-		<java.version>1.12</java.version>
-		<maven.compiler.source>12</maven.compiler.source>
-		<maven.compiler.target>12</maven.compiler.target>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>8</maven.compiler.source>
+		<maven.compiler.target>8</maven.compiler.target>
 	</properties>
 	<dependencies>
 

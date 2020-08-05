@@ -2,8 +2,10 @@ package io.mycat.dao;
 
 import io.mycat.dao.DomainER.ChildrenDomainQuery;
 import io.mycat.dao.DomainER.O2MQuery;
+import io.mycat.dao.DomainER.PowerDomainQuery;
 import io.mycat.dao.DomainER.SingleDomainQuery;
 import io.mycat.dao.query.PagedQuery;
+import io.mycat.dao.update.CatDelete;
 import io.mycat.dao.update.CatUpdate;
 import io.mycat.dao.util.JsonResultSet;
 import org.slf4j.Logger;
@@ -67,6 +69,9 @@ public class LeaderDao {
 
     @Autowired
     private CatUpdate catUpdate;
+
+    @Autowired
+    private CatDelete catDelete;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
@@ -170,8 +175,8 @@ public class LeaderDao {
     public boolean insert(Object o, Class<?> cls) {
         String insertSql = catUpdate.createInsertSql(cls);
         Map<String, Object> insertValueMap = catUpdate.createInsertValueMap(o, cls);
-        log.info("SQL ------" + insertSql);
-        log.info("VALUES ------" + insertValueMap);
+        log.info("SQL ------ insertSql {}" + insertSql);
+        log.info("VALUES ------ insertValueMap {} " + insertValueMap);
         return jdbcTemplate.update(insertSql, insertValueMap) > 0;
     }
 
@@ -185,9 +190,16 @@ public class LeaderDao {
      */
     public boolean batchUpdate(Collection entityList, Class<?> cls) {
         String insertSql = catUpdate.createInsertSql(cls);
-        log.info("SQL ------" + insertSql);
+        log.info("SQL ------ batchUpdate {}" + insertSql);
         jdbcTemplate.batchUpdate(insertSql, catUpdate.createBatchUpdateBP(entityList));
         return true;
+    }
+
+    public boolean delete(PagedQuery query) {
+        PowerDomainQuery query1 = (PowerDomainQuery) query;
+        String deleteSql = query1.buildDeleteSQL();
+        log.info("SQL ------ deleteSql {}", deleteSql);
+        return jdbcTemplate.update(deleteSql, query1.getQueryParams()) > 0;
     }
 
 }

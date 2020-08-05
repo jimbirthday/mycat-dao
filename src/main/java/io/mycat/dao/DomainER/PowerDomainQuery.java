@@ -1,20 +1,13 @@
 package io.mycat.dao.DomainER;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.mycat.dao.query.AutoQueryConditonHandler;
 import io.mycat.dao.query.DynaQueryCondHanlder;
 import io.mycat.dao.query.PagedQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * @author Leader us
@@ -37,7 +30,7 @@ public class PowerDomainQuery extends PagedQuery {
 
     /**
      * 使用默认的AutoQueryConditonHandler处理变量条件语句
-     * 
+     *
      * @param dynaConditon
      * @return
      */
@@ -49,7 +42,7 @@ public class PowerDomainQuery extends PagedQuery {
 
     /**
      * 使用自定义的ConditonHandler处理变量条件语句
-     * 
+     *
      * @param condHandler
      * @return
      */
@@ -177,6 +170,48 @@ public class PowerDomainQuery extends PagedQuery {
             return t;
         };
 
+    }
+
+    public String buildDeleteSQL() {
+
+        Set<String> allDomains = new LinkedHashSet<>();
+        Set<String> allFields = new HashSet<>();
+        StringBuilder sb = new StringBuilder().append("DELETE FROM ");
+        for (QueryField field : queryFields) {
+            if (field instanceof DomainField) {
+                DomainField theField = (DomainField) field;
+                allDomains.add(theField.domain.domainCls.getCanonicalName());
+
+            }
+            String fieldAlias = field.getAlias();
+            if (allFields.contains(fieldAlias)) {
+                if (autoRemoveDuplicateFields) {
+                    if (log.isDebugEnabled())
+                        log.debug("removed duplicate select fields {}", fieldAlias);
+                    continue;
+
+                } else {
+                    throw new RuntimeException("duplicate domain fields selected :" + field.getAlias());
+                }
+
+            }
+            allFields.add(fieldAlias);
+        }
+        for (String domainName : allDomains) {
+            DomainInfo domain = DomainAutoRelations.findDomainByClassName(domainName);
+            sb.append(domain.tableName).append(",");
+
+        }
+        sb = sb.deleteCharAt(sb.lastIndexOf(","));
+        sb.append(" WHERE ");
+        if (this.condHandler != null) {
+            String cond = condHandler.genCondtions(queryParams);
+            if (cond != null && !cond.isEmpty()) {
+                sb.append(cond);
+            }
+
+        }
+        return sb.toString();
     }
 
     public List<QueryField> getQueryFields() {
